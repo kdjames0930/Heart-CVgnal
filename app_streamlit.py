@@ -56,9 +56,20 @@ _HOT   = (147,  20, 255)
 _MED   = (180, 105, 255)
 _LIGHT = (203, 192, 255)
 
-RTC_CONFIG = RTCConfiguration(
-    {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
-)
+RTC_CONFIG = RTCConfiguration({
+    "iceServers": [
+        {"urls": ["stun:stun.l.google.com:19302"]},
+        {
+            "urls": [
+                "turn:openrelay.metered.ca:80",
+                "turn:openrelay.metered.ca:443",
+                "turn:openrelay.metered.ca:443?transport=tcp",
+            ],
+            "username": "openrelayproject",
+            "credential": "openrelayproject",
+        },
+    ]
+})
 
 _DEFAULT_STATE: dict = dict(
     score=50, mood="Warming Up", time_left="03:00",
