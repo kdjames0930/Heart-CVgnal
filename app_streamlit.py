@@ -623,9 +623,9 @@ with st.sidebar:
     apply_clicked = st.button("Apply", key="apply_api_key", use_container_width=True)
 
     if st.session_state["vlm_active"]:
-        st.success("VLM Active", icon="✓")
+        st.success("VLM Active")
     else:
-        st.info("VLM Offline", icon="○")
+        st.info("VLM Offline")
 
 # ── Header placeholder (updated in fragment) ────────────────────────────────
 header_ph = st.empty()
