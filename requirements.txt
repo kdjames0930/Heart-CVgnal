@@ -1,13 +1,17 @@
 # Recommended Python: 3.11.x
 #
 # Heart CV-gnal — pure Computer Vision framework
-# Audio / NLP / LLM dependencies have been intentionally removed.
 
 numpy>=1.26,<2.0
 opencv-python>=4.10,<4.11
 mediapipe>=0.10.14,<0.11
 pillow>=10.4,<11
 flask>=3.0,<4.0
+
+# Streamlit Cloud
+streamlit>=1.33
+streamlit-webrtc>=0.47
+aiortc>=1.6
 
 # Optional — VLM cross-validator (set ANTHROPIC_API_KEY to activate)
 anthropic>=0.40,<1.0
