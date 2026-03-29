@@ -32,7 +32,7 @@ from heart_cvgnal.pipelines.vision.vlm_analyzer import VLMAnalyzer
 # ── Demo config (mirrors runner.py) ─────────────────────────────────────────
 _DEMO_DURATION = 180.0   # 3 minutes
 _EVAL_WINDOW   = 5.0     # seconds per scoring window
-_CAMERA_INDEX  = 1   # 0 = 맥 내장, 1 = 아이폰 Continuity Camera
+_CAMERA_INDEX  = 0   # 0 = 맥 내장, 1 = 아이폰 Continuity Camera
 
 # ── Mood labels ──────────────────────────────────────────────────────────────
 _MOOD_LABELS = [
