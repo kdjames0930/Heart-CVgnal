@@ -22,6 +22,7 @@ import av
 import cv2
 import mediapipe as mp
 import numpy as np
+import requests
 import streamlit as st
 from streamlit_webrtc import RTCConfiguration, VideoProcessorBase, webrtc_streamer
 
@@ -56,20 +57,27 @@ _HOT   = (147,  20, 255)
 _MED   = (180, 105, 255)
 _LIGHT = (203, 192, 255)
 
-RTC_CONFIG = RTCConfiguration({
-    "iceServers": [
-        {"urls": ["stun:stun.l.google.com:19302"]},
-        {
-            "urls": [
-                "turn:openrelay.metered.ca:80",
-                "turn:openrelay.metered.ca:443",
-                "turn:openrelay.metered.ca:443?transport=tcp",
-            ],
-            "username": "openrelayproject",
-            "credential": "openrelayproject",
-        },
-    ]
-})
+def _get_rtc_config() -> RTCConfiguration:
+    """Return RTCConfiguration with TURN servers from metered.ca if API key is set."""
+    _STUN_ONLY = RTCConfiguration(
+        {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+    )
+    try:
+        api_key = st.secrets.get("METERED_API_KEY") or os.environ.get("METERED_API_KEY")
+        if not api_key:
+            return _STUN_ONLY
+        resp = requests.get(
+            "https://heart-cvgnal.metered.live/api/v1/turn/credentials",
+            params={"apiKey": api_key},
+            timeout=5,
+        )
+        if resp.ok:
+            return RTCConfiguration({"iceServers": resp.json()})
+    except Exception:
+        pass
+    return _STUN_ONLY
+
+RTC_CONFIG = _get_rtc_config()
 
 _DEFAULT_STATE: dict = dict(
     score=50, mood="Warming Up", time_left="03:00",
