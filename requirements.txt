@@ -1,11 +1,11 @@
-# Recommended Python: 3.11.x
+# Requires Python 3.11 — set in Streamlit Cloud dashboard: Settings → Python version → 3.11
 #
 # Heart CV-gnal — pure Computer Vision framework
 
 numpy>=1.26,<2.0
 opencv-python>=4.10,<4.11
 mediapipe==0.10.14
-pillow>=10.4,<11
+pillow>=10.4
 flask>=3.0,<4.0
 
 # Streamlit Cloud

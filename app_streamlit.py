@@ -12,6 +12,7 @@ Streamlit Cloud:
 """
 from __future__ import annotations
 
+import os
 import sys
 import threading
 import time
@@ -116,6 +117,21 @@ class HeartCVProcessor(VideoProcessorBase):
         self._last_output                = None
         self._seen_event                 = ""
         self._event_counter              = 0
+
+    # ── API key setter (can be called after init) ─────────────────────────
+    def set_api_key(self, key: str) -> bool:
+        """Set Anthropic API key and reinitialize VLM. Returns True if VLM is now active."""
+        if not _HAS_VLM:
+            return False
+        os.environ["ANTHROPIC_API_KEY"] = key
+        try:
+            new_vlm = VLMAnalyzer()
+            with self._lock:
+                self._vlm = new_vlm
+                self._state["vlm_available"] = new_vlm.available
+            return new_vlm.available
+        except Exception:
+            return False
 
     # ── Thread-safe state accessor ────────────────────────────────────────
     def get_state(self) -> dict:
@@ -576,7 +592,7 @@ def _final_screen_html(state: dict) -> str:
 st.set_page_config(
     page_title="Heart CV-gnal ♥",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="auto",
 )
 
 st.markdown(_CSS, unsafe_allow_html=True)
@@ -587,6 +603,29 @@ if "last_event_id" not in st.session_state:
     st.session_state["last_event_id"] = 0
 if "final_shown" not in st.session_state:
     st.session_state["final_shown"] = False
+if "vlm_active" not in st.session_state:
+    st.session_state["vlm_active"] = False
+
+# ── Sidebar — API key input ──────────────────────────────────────────────────
+with st.sidebar:
+    st.markdown("### Settings")
+    st.markdown("---")
+    st.markdown("**Claude VLM Cross-validator**")
+    st.caption("Anthropic API 키를 입력하면 Claude가 표정/자세를 추가로 분석합니다.")
+
+    api_key_input = st.text_input(
+        "Anthropic API Key",
+        type="password",
+        placeholder="sk-ant-...",
+        key="api_key_input",
+    )
+
+    apply_clicked = st.button("Apply", key="apply_api_key", use_container_width=True)
+
+    if st.session_state["vlm_active"]:
+        st.success("VLM Active", icon="✓")
+    else:
+        st.info("VLM Offline", icon="○")
 
 # ── Header placeholder (updated in fragment) ────────────────────────────────
 header_ph = st.empty()
@@ -616,6 +655,24 @@ with col_panel:
 
     @st.fragment(run_every=0.5)
     def side_panel() -> None:
+        # Apply API key if button was clicked
+        if apply_clicked and api_key_input:
+            if webrtc_ctx.video_processor is not None:
+                ok = webrtc_ctx.video_processor.set_api_key(api_key_input)
+                st.session_state["vlm_active"] = ok
+            else:
+                # Store for later — processor not ready yet
+                st.session_state["pending_api_key"] = api_key_input
+
+        # Apply pending key once processor becomes available
+        if (
+            "pending_api_key" in st.session_state
+            and webrtc_ctx.video_processor is not None
+        ):
+            pending = st.session_state.pop("pending_api_key")
+            ok = webrtc_ctx.video_processor.set_api_key(pending)
+            st.session_state["vlm_active"] = ok
+
         # Get current state
         if webrtc_ctx.video_processor is not None:
             state = webrtc_ctx.video_processor.get_state()
