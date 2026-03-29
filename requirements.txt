@@ -9,8 +9,8 @@ pillow>=10.4
 flask>=3.0,<4.0
 
 # Streamlit Cloud
-streamlit>=1.33,<1.45
-streamlit-webrtc==0.47.6
+streamlit>=1.33
+streamlit-webrtc>=0.47
 aiortc>=1.6
 requests>=2.27
 
